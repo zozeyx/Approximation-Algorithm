@@ -8,7 +8,7 @@ public class JobScheduling {
     public static int approximateJobScheduling(int m, int[] operation_time) {
         int n = operation_time.length;  // 작업의 개수
         int[] L = new int[m];  // 각 기계에 배정된 마지막 작업 종료 시간을 나타내는 배열
-        List<List<Integer>> machines = new ArrayList<>();  // 각 기계에서 실행된 작업들을 추적하는 리스트 배열
+        List<List<String>> machines = new ArrayList<>();  // 각 기계에서 실행된 작업들을 추적하는 리스트 배열
         
         // 각 기계에 대해 작업 리스트 초기화
         for (int i = 0; i < m; i++) {
@@ -29,7 +29,7 @@ public class JobScheduling {
             // 작업 i를 가장 빨리 끝나는 기계에 할당
             int startTime = L[minMachine];  // 해당 기계의 작업 시작 시간
             L[minMachine] += operation_time[i]; // 해당 기계의 종료 시간 갱신
-            machines.get(minMachine).add(startTime);  // 작업의 시작 시간을 해당 기계의 작업 리스트에 추가
+            machines.get(minMachine).add("t" + (i + 1) + "(" + startTime + "시)");  // 작업 이름(t1, t2, ...)과 시작 시간을 추가
         }
 
         // 전체 시간표를 보여주는 출력 (시간 0부터 12까지)
@@ -40,10 +40,10 @@ public class JobScheduling {
             Arrays.fill(timeSlot, -1); // 초기값 -1로 설정 (작업이 없음을 표시)
 
             // 기계에서 실행된 각 작업의 시작 시간을 시간 슬롯에 배치
-            for (int j = 0; j < machines.get(i).size(); j++) {
-                int startTime = machines.get(i).get(j);
-                int taskId = j + 1;  // 작업 번호 (t1, t2, ...)
-                timeSlot[startTime] = taskId;  // 작업 번호를 해당 시작 시간에 배치
+            for (String task : machines.get(i)) {
+                int startTime = Integer.parseInt(task.substring(task.indexOf('(') + 1, task.indexOf('시')));
+                int taskId = Integer.parseInt(task.substring(1, task.indexOf('('))) - 1;  // 작업 번호(t1, t2, t3 ...) 추출
+                timeSlot[startTime] = taskId + 1;  // 작업 번호를 해당 시작 시간에 배치
             }
 
             // 시간 슬롯을 출력
