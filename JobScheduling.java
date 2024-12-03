@@ -32,10 +32,12 @@ public class JobScheduling {
             machines.get(minMachine).add("t" + (i + 1) + "(" + startTime + "시)");  // 작업 이름(t1, t2, ...)과 시작 시간을 추가
         }
 
-        // 전체 시간표를 보여주는 출력 (시간 0부터 12까지)
-        System.out.println("전체 시간표:");
-        for (int i = 0; i < m; i++) {
-            System.out.print("기계 M" + (i + 1) + ": ");
+        // 시간대 0부터 12까지 표시
+        System.out.println("시간대 0  1  2  3  4  5  6  7  8  9  10  11  12");
+
+        // 각 기계별 작업 배치 결과 출력
+        for (int i = m - 1; i >= 0; i--) {  // m4, m3, m2, m1 순으로 출력
+            System.out.print("m" + (i + 1) + " ");
             int[] timeSlot = new int[13]; // 0부터 12까지 시간 슬롯 (13개)
             Arrays.fill(timeSlot, -1); // 초기값 -1로 설정 (작업이 없음을 표시)
 
@@ -49,7 +51,7 @@ public class JobScheduling {
             // 시간 슬롯을 출력
             for (int time = 0; time < 13; time++) {
                 if (timeSlot[time] != -1) {
-                    System.out.print("t" + timeSlot[time] + " (" + time + "시) ");
+                    System.out.print("t" + timeSlot[time] + " ");
                 } else {
                     System.out.print("    ");  // 해당 시간대에 작업이 없으면 공백 출력
                 }
