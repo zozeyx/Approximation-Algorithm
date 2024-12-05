@@ -5,6 +5,7 @@
 #include <cmath>
 #include <limits>
 #include <iomanip>
+#include <algorithm>
 
 using namespace std;
 
@@ -22,6 +23,20 @@ struct Point {
 // 두 점 사이의 유클리드 거리 계산
 double calculateDistance(const Point& p1, const Point& p2) {
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
+}
+
+// 입력 데이터 중에서 중심점에 가장 가까운 점 찾기
+Point findClosestPoint(const Point& center, const vector<Point>& points) {
+    double minDistance = numeric_limits<double>::max();
+    Point closest = points[0];
+    for (const auto& point : points) {
+        double distance = calculateDistance(center, point);
+        if (distance < minDistance) {
+            minDistance = distance;
+            closest = point;
+        }
+    }
+    return closest;
 }
 
 // 클러스터의 중심점 계산 (x, y 좌표 평균값)
@@ -68,9 +83,11 @@ void kMeansClustering(vector<Point>& points, int k) {
 
         // 중심점 업데이트
         changed = false;
-        for (int i = 1; i < k; ++i) { // 첫 번째 중심점(centers[0])은 고정
+        for (int i = 0; i < k; ++i) {
             if (!clusters[i].empty()) {
                 Point newCenter = calculateCenter(clusters[i]);
+                // 중심점이 입력 데이터에 없으면 가장 가까운 점으로 대체
+                newCenter = findClosestPoint(newCenter, points);
                 if (newCenter.x != centers[i].x || newCenter.y != centers[i].y) {
                     centers[i] = newCenter;
                     changed = true;
@@ -84,11 +101,6 @@ void kMeansClustering(vector<Point>& points, int k) {
     for (int i = 0; i < k; ++i) {
         cout << "Cluster " << i + 1 << ":\n";
         cout << "Center: (" << centers[i].x << ", " << centers[i].y << ")\n"; // 중심점 출력
-
-        // 중심점을 클러스터 점 목록에 강제로 추가
-        if (find(clusters[i].begin(), clusters[i].end(), centers[i]) == clusters[i].end()) {
-            clusters[i].push_back(centers[i]);
-        }
 
         // 클러스터 점 출력
         for (const auto& point : clusters[i]) {
