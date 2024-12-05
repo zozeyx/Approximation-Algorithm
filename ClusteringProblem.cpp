@@ -25,20 +25,6 @@ double calculateDistance(const Point& p1, const Point& p2) {
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 }
 
-// 입력 데이터 중에서 중심점에 가장 가까운 점 찾기
-Point findClosestPoint(const Point& center, const vector<Point>& points) {
-    double minDistance = numeric_limits<double>::max();
-    Point closest = points[0];
-    for (const auto& point : points) {
-        double distance = calculateDistance(center, point);
-        if (distance < minDistance) {
-            minDistance = distance;
-            closest = point;
-        }
-    }
-    return closest;
-}
-
 // 클러스터의 중심점 계산 (x, y 좌표 평균값)
 Point calculateCenter(const vector<Point>& cluster) {
     int sumX = 0, sumY = 0;
@@ -54,7 +40,7 @@ void kMeansClustering(vector<Point>& points, int k) {
     vector<Point> centers(k);          // 중심점 저장
     vector<vector<Point>> clusters(k); // 각 클러스터에 포함된 점
 
-    // 첫 번째 중심점은 입력 파일의 첫 번째 좌표로 설정
+    // 첫 번째 중심점은 입력 파일의 첫 번째 좌표로 고정
     centers[0] = points[0];
     for (int i = 1; i < k; ++i) {
         centers[i] = points[i % points.size()]; // 초기화 (순환 선택)
@@ -83,11 +69,9 @@ void kMeansClustering(vector<Point>& points, int k) {
 
         // 중심점 업데이트
         changed = false;
-        for (int i = 0; i < k; ++i) {
+        for (int i = 1; i < k; ++i) { // 첫 번째 중심점은 변경하지 않음
             if (!clusters[i].empty()) {
                 Point newCenter = calculateCenter(clusters[i]);
-                // 중심점이 입력 데이터에 없으면 가장 가까운 점으로 대체
-                newCenter = findClosestPoint(newCenter, points);
                 if (newCenter.x != centers[i].x || newCenter.y != centers[i].y) {
                     centers[i] = newCenter;
                     changed = true;
