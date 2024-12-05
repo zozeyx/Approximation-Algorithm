@@ -12,6 +12,11 @@ using namespace std;
 struct Point {
     int x, y;
     Point(int x = 0, int y = 0) : x(x), y(y) {}
+
+    // 두 점이 같은지 비교하는 연산자
+    bool operator==(const Point& other) const {
+        return x == other.x && y == other.y;
+    }
 };
 
 // 두 점 사이의 유클리드 거리 계산
@@ -78,10 +83,18 @@ void kMeansClustering(vector<Point>& points, int k) {
     cout << "Clusters and Centers:\n";
     for (int i = 0; i < k; ++i) {
         cout << "Cluster " << i + 1 << ":\n";
+        cout << "Center: (" << centers[i].x << ", " << centers[i].y << ")\n"; // 중심점 출력
+
+        // 중심점을 클러스터 점 목록에 강제로 추가
+        if (find(clusters[i].begin(), clusters[i].end(), centers[i]) == clusters[i].end()) {
+            clusters[i].push_back(centers[i]);
+        }
+
+        // 클러스터 점 출력
         for (const auto& point : clusters[i]) {
             cout << "(" << point.x << ", " << point.y << ")\n";
         }
-        cout << "Center: (" << centers[i].x << ", " << centers[i].y << ")\n\n";
+        cout << endl;
     }
 }
 
