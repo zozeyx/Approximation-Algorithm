@@ -43,7 +43,7 @@ public class JobScheduling {
         for (int i = m - 1; i >= 0; i--) {  // m4, m3, m2, m1 순으로 출력
             System.out.print("m" + (i + 1) + " ");
             String[] timeSlot = new String[11]; // 0부터 10까지 시간 슬롯 (11개)
-            Arrays.fill(timeSlot, "    "); // 초기값 공백으로 설정 (작업이 없음을 표시)
+            Arrays.fill(timeSlot, "  "); // 초기값 공백으로 설정 (작업이 없음을 표시)
 
             // 기계에서 실행된 각 작업의 시작 시간을 시간 슬롯에 배치
             for (String task : machines.get(i)) {
@@ -54,7 +54,7 @@ public class JobScheduling {
 
             // 각 시간대에 배치된 작업을 출력
             for (int time = 0; time < 11; time++) {
-                System.out.print(timeSlot[time] + "  ");  // 각 시간대에 배치된 작업을 출력
+                System.out.print(timeSlot[time] + " ");  // 각 시간대에 배치된 작업을 출력
             }
             System.out.println();
         }
