@@ -3,17 +3,23 @@
 #include <cmath>
 #include <fstream>
 #include <limits>
+#include <set>
 
 using namespace std;
 
 struct Point {
-    int x, y;  // 좌표는 정수형으로 변경
+    int x, y;  // 좌표는 정수형으로 설정
     
     Point(int x = 0, int y = 0) : x(x), y(y) {}
     
     // 두 점 간의 거리 계산 (정수형 좌표 간 거리)
     double distance(const Point& p) const {
         return sqrt(pow(x - p.x, 2) + pow(y - p.y, 2));
+    }
+
+    // 중복 확인을 위해 '==' 연산자 오버로딩
+    bool operator<(const Point& p) const {
+        return x < p.x || (x == p.x && y < p.y);  // x가 같으면 y 비교
     }
 };
 
@@ -90,14 +96,17 @@ void Approx_k_Clusters(const vector<Point>& points, int k) {
 
 int main() {
     ifstream inputFile("clustering_input.txt");
-    vector<Point> points;
+    set<Point> uniquePoints;  // 중복을 제거하기 위한 set
 
     int x, y;
     while (inputFile >> x >> y) {
-        points.push_back(Point(x, y));
+        uniquePoints.insert(Point(x, y));  // set에 삽입
     }
 
     inputFile.close();
+
+    // 중복된 좌표를 제거한 후, 벡터로 변환
+    vector<Point> points(uniquePoints.begin(), uniquePoints.end());
 
     int k = 8;  // 8개의 클러스터
     Approx_k_Clusters(points, k);
