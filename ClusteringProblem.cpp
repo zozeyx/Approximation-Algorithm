@@ -7,11 +7,11 @@
 using namespace std;
 
 struct Point {
-    double x, y;
+    int x, y;  // 좌표는 정수형으로 변경
     
-    Point(double x = 0, double y = 0) : x(x), y(y) {}
+    Point(int x = 0, int y = 0) : x(x), y(y) {}
     
-    // 두 점 간의 거리 계산
+    // 두 점 간의 거리 계산 (정수형 좌표 간 거리)
     double distance(const Point& p) const {
         return sqrt(pow(x - p.x, 2) + pow(y - p.y, 2));
     }
@@ -19,12 +19,14 @@ struct Point {
 
 // 각 클러스터의 중심을 계산하는 함수
 Point calculateCenter(const vector<Point>& cluster) {
-    double sum_x = 0, sum_y = 0;
+    int sum_x = 0, sum_y = 0;
     for (const auto& p : cluster) {
         sum_x += p.x;
         sum_y += p.y;
     }
-    return Point(sum_x / cluster.size(), sum_y / cluster.size());
+    int center_x = sum_x / cluster.size();
+    int center_y = sum_y / cluster.size();
+    return Point(center_x, center_y);
 }
 
 // 클러스터링 알고리즘
@@ -34,19 +36,14 @@ void Approx_k_Clusters(const vector<Point>& points, int k) {
     vector<vector<Point>> clusters(k);  // 각 클러스터의 점들
     vector<int> assignments(n, -1);  // 각 점이 속하는 클러스터 번호
 
-    // 1. 첫 번째 좌표를 첫 번째 중심점으로 설정
+    // 1. 첫 번째 좌표를 첫 번째 중심으로 설정
     centers[0] = points[0];
     
-    // 2. k개의 클러스터를 랜덤하게 초기화 (첫 번째는 이미 설정됨)
-    for (int i = 1; i < k; i++) {
-        centers[i] = points[i];  // 첫 번째부터 k번째 점을 초기 중심으로 설정
-    }
-
     bool changed;
     do {
         changed = false;
         
-        // 3. 각 점에 대해 가장 가까운 중심점 찾기
+        // 2. 각 점에 대해 가장 가까운 중심점 찾기
         for (int i = 0; i < k; i++) {
             clusters[i].clear();  // 클러스터 초기화
         }
@@ -62,7 +59,7 @@ void Approx_k_Clusters(const vector<Point>& points, int k) {
                 }
             }
             
-            // 4. 점이 속할 클러스터 변경되면 할당
+            // 3. 점이 속할 클러스터 변경되면 할당
             if (assignments[i] != closestCluster) {
                 assignments[i] = closestCluster;
                 changed = true;
@@ -70,7 +67,7 @@ void Approx_k_Clusters(const vector<Point>& points, int k) {
             clusters[closestCluster].push_back(points[i]);
         }
 
-        // 5. 각 클러스터의 중심점 재계산
+        // 4. 각 클러스터의 중심점 재계산
         for (int i = 0; i < k; i++) {
             if (!clusters[i].empty()) {
                 centers[i] = calculateCenter(clusters[i]);
@@ -95,7 +92,7 @@ int main() {
     ifstream inputFile("clustering_input.txt");
     vector<Point> points;
 
-    double x, y;
+    int x, y;
     while (inputFile >> x >> y) {
         points.push_back(Point(x, y));
     }
