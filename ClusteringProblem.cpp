@@ -25,55 +25,44 @@ double calculateDistance(const Point& p1, const Point& p2) {
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 }
 
-// 클러스터의 중심점 계산 (x, y 좌표 평균값)
-Point calculateCenter(const vector<Point>& cluster) {
-    int sumX = 0, sumY = 0;
-    for (const auto& point : cluster) {
-        sumX += point.x;
-        sumY += point.y;
-    }
-    return Point(sumX / cluster.size(), sumY / cluster.size());
-}
-
-// K-means++ 초기화 알고리즘
-void initializeCenters(const vector<Point>& points, vector<Point>& centers, int k) {
-    centers.push_back(points[0]); // 첫 번째 중심점은 파일의 첫 번째 점으로 설정
-
-    // 나머지 k-1개의 중심점 선택
-    for (int i = 1; i < k; ++i) {
-        vector<double> distances(points.size(), numeric_limits<double>::max());
-
-        // 각 점에 대해 가장 가까운 중심점과의 거리를 계산
-        for (int j = 0; j < points.size(); ++j) {
-            double minDist = numeric_limits<double>::max();
-            for (int c = 0; c < centers.size(); ++c) {
-                double dist = calculateDistance(points[j], centers[c]);
-                minDist = min(minDist, dist);
-            }
-            distances[j] = minDist * minDist; // 거리의 제곱값을 사용
-        }
-
-        // 가장 큰 거리를 가진 점을 새로운 중심점으로 추가
-        double maxDist = -1;
-        int maxIndex = -1;
-        for (int j = 0; j < points.size(); ++j) {
-            if (distances[j] > maxDist) {
-                maxDist = distances[j];
-                maxIndex = j;
-            }
-        }
-
-        centers.push_back(points[maxIndex]);
-    }
-}
-
 // K-means 알고리즘
 void kMeansClustering(vector<Point>& points, int k) {
     vector<Point> centers(k);          // 중심점 저장
     vector<vector<Point>> clusters(k); // 각 클러스터에 포함된 점
 
     // 첫 번째 중심점은 입력 파일의 첫 번째 좌표로 고정
-    initializeCenters(points, centers, k);
+    centers[0] = points[0];
+    set<int> usedIndices;
+    usedIndices.insert(0); // 첫 번째 좌표는 이미 사용됨
+
+    // 나머지 중심점은 기존 중심점들에 대해 가장 먼 점을 선택
+    for (int i = 1; i < k; ++i) {
+        double maxDistance = -1.0;
+        int farthestIdx = -1;
+
+        // 각 점에 대해 가장 먼 중심점을 찾아서 그 점을 선택
+        for (int j = 0; j < points.size(); ++j) {
+            if (usedIndices.find(j) == usedIndices.end()) { // 아직 선택되지 않은 점만 고려
+                double minDistanceToCenters = numeric_limits<double>::max();
+
+                // 기존 중심점들과의 최소 거리 계산
+                for (int c = 0; c < i; ++c) {
+                    double dist = calculateDistance(points[j], centers[c]);
+                    minDistanceToCenters = min(minDistanceToCenters, dist);
+                }
+
+                // 가장 먼 중심점과의 거리 찾기
+                if (minDistanceToCenters > maxDistance) {
+                    maxDistance = minDistanceToCenters;
+                    farthestIdx = j;
+                }
+            }
+        }
+
+        // 가장 먼 점을 새로운 중심점으로 추가
+        centers[i] = points[farthestIdx];
+        usedIndices.insert(farthestIdx);
+    }
 
     bool changed;
     do {
@@ -98,12 +87,24 @@ void kMeansClustering(vector<Point>& points, int k) {
 
         // 중심점 업데이트
         changed = false;
-        for (int i = 0; i < k; ++i) {
+        for (int i = 1; i < k; ++i) { // 첫 번째 중심점은 변경하지 않음
             if (!clusters[i].empty()) {
-                // 클러스터의 새로운 중심점을 계산
-                Point newCenter = calculateCenter(clusters[i]);
+                Point newCenter = clusters[i][0]; // 새 중심점 초기값은 클러스터의 첫 번째 점
+                double minSumDistance = numeric_limits<double>::max();
 
-                // 중심점이 변경되었으면, 해당 중심점을 업데이트하고 flag를 true로 설정
+                // 중심점 후보는 클러스터 내의 모든 점 중에서 선택
+                for (const auto& candidate : clusters[i]) {
+                    double sumDistance = 0.0;
+                    for (const auto& point : clusters[i]) {
+                        sumDistance += calculateDistance(candidate, point);
+                    }
+                    if (sumDistance < minSumDistance) {
+                        minSumDistance = sumDistance;
+                        newCenter = candidate;
+                    }
+                }
+
+                // 중심점이 변경되었는지 확인
                 if (newCenter.x != centers[i].x || newCenter.y != centers[i].y) {
                     centers[i] = newCenter;
                     changed = true;
