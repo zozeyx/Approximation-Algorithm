@@ -36,7 +36,7 @@ Point calculateCenter(const vector<Point>& cluster) {
     return Point(sumX / cluster.size(), sumY / cluster.size());
 }
 
-// K-means++ 초기화
+// K-means++ 초기화 (첫 번째 중심점은 파일의 첫 번째 좌표로 고정)
 void initializeCentersKMeansPlusPlus(vector<Point>& points, vector<Point>& centers, int k) {
     centers[0] = points[0]; // 첫 번째 중심점: 첫 번째 좌표 고정
     set<int> usedIndices;   // 이미 선택된 중심점 인덱스를 추적
