@@ -35,10 +35,10 @@ public class JobScheduling {
             machines.get(minMachine).add("t" + (i + 1) + "(" + startTime + "~" + endTime + ")");
         }
 
-        // m/t 출력
+        // m/t 출력 (숫자 간격을 맞추기 위해 고정된 폭 사용)
         System.out.print("m/t ");
         for (int i = 0; i <= 12; i++) { // 시간대 출력 (0부터 12까지)
-            System.out.print(i + "  ");
+            System.out.printf("%3d", i); // 3자리로 출력 (숫자 간격 고정)
         }
         System.out.println();
 
@@ -63,7 +63,7 @@ public class JobScheduling {
 
             // 각 시간대에 배치된 작업을 출력
             for (int time = 0; time <= 12; time++) {
-                System.out.print(timeSlot[time] + " "); // 각 시간대에 배치된 작업을 출력
+                System.out.printf("%3s", timeSlot[time]); // 3자리로 출력 (문자열 간격 고정)
             }
             System.out.println();
         }
