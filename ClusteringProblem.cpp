@@ -6,6 +6,7 @@
 #include <limits>
 #include <iomanip>
 #include <algorithm>
+#include <cstdlib>
 
 using namespace std;
 
@@ -25,25 +26,70 @@ double calculateDistance(const Point& p1, const Point& p2) {
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 }
 
+// 클러스터의 중심점 계산 (x, y 좌표 평균값)
+Point calculateCenter(const vector<Point>& cluster) {
+    int sumX = 0, sumY = 0;
+    for (const auto& point : cluster) {
+        sumX += point.x;
+        sumY += point.y;
+    }
+    return Point(sumX / cluster.size(), sumY / cluster.size());
+}
+
+// K-means++ 초기화
+void initializeCentersKMeansPlusPlus(vector<Point>& points, vector<Point>& centers, int k) {
+    centers[0] = points[0]; // 첫 번째 중심점: 첫 번째 좌표 고정
+    set<int> usedIndices;   // 이미 선택된 중심점 인덱스를 추적
+    usedIndices.insert(0);
+
+    // 거리 제곱 배열
+    vector<double> distances(points.size(), numeric_limits<double>::max());
+
+    for (int i = 1; i < k; ++i) {
+        double totalDistance = 0.0;
+
+        // 각 점에 대해 가장 가까운 기존 중심점과의 거리 제곱 계산
+        for (int j = 0; j < points.size(); ++j) {
+            if (usedIndices.find(j) != usedIndices.end()) continue; // 이미 선택된 점은 건너뜀
+
+            // 기존 중심점들과의 최소 거리 제곱 계산
+            double minDistanceSquared = numeric_limits<double>::max();
+            for (int centerIdx : usedIndices) {
+                double dist = calculateDistance(points[j], centers[centerIdx]);
+                minDistanceSquared = min(minDistanceSquared, dist * dist);
+            }
+            distances[j] = minDistanceSquared;
+            totalDistance += distances[j];
+        }
+
+        // 거리 제곱에 비례하여 새로운 중심점 선택
+        double target = (rand() / (double)RAND_MAX) * totalDistance;
+        double cumulativeDistance = 0.0;
+        int selectedIdx = -1;
+
+        for (int j = 0; j < points.size(); ++j) {
+            if (usedIndices.find(j) != usedIndices.end()) continue;
+            cumulativeDistance += distances[j];
+            if (cumulativeDistance >= target) {
+                selectedIdx = j;
+                break;
+            }
+        }
+
+        if (selectedIdx != -1) {
+            centers[i] = points[selectedIdx];
+            usedIndices.insert(selectedIdx);
+        }
+    }
+}
+
 // K-means 알고리즘
 void kMeansClustering(vector<Point>& points, int k) {
     vector<Point> centers(k);          // 중심점 저장
     vector<vector<Point>> clusters(k); // 각 클러스터에 포함된 점
 
-    // 첫 번째 중심점은 입력 파일의 첫 번째 좌표로 고정
-    centers[0] = points[0];
-    set<int> usedIndices;
-    usedIndices.insert(0); // 첫 번째 좌표는 이미 사용됨
-
-    // 나머지 초기 중심점은 입력 데이터에서 고름
-    for (int i = 1; i < k; ++i) {
-        int idx;
-        do {
-            idx = rand() % points.size(); // 입력 데이터 범위 내에서 랜덤 인덱스 선택
-        } while (usedIndices.find(idx) != usedIndices.end()); // 중복 방지
-        usedIndices.insert(idx);
-        centers[i] = points[idx];
-    }
+    // K-means++ 초기화: 첫 번째 중심점은 파일의 첫 번째 좌표로 고정
+    initializeCentersKMeansPlusPlus(points, centers, k);
 
     bool changed;
     do {
@@ -68,24 +114,9 @@ void kMeansClustering(vector<Point>& points, int k) {
 
         // 중심점 업데이트
         changed = false;
-        for (int i = 1; i < k; ++i) { // 첫 번째 중심점은 변경하지 않음
+        for (int i = 0; i < k; ++i) {
             if (!clusters[i].empty()) {
-                Point newCenter = clusters[i][0]; // 새 중심점 초기값은 클러스터의 첫 번째 점
-                double minSumDistance = numeric_limits<double>::max();
-
-                // 중심점 후보는 클러스터 내의 모든 점 중에서 선택
-                for (const auto& candidate : clusters[i]) {
-                    double sumDistance = 0.0;
-                    for (const auto& point : clusters[i]) {
-                        sumDistance += calculateDistance(candidate, point);
-                    }
-                    if (sumDistance < minSumDistance) {
-                        minSumDistance = sumDistance;
-                        newCenter = candidate;
-                    }
-                }
-
-                // 중심점이 변경되었는지 확인
+                Point newCenter = calculateCenter(clusters[i]);
                 if (newCenter.x != centers[i].x || newCenter.y != centers[i].y) {
                     centers[i] = newCenter;
                     changed = true;
