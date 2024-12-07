@@ -25,40 +25,55 @@ double calculateDistance(const Point& p1, const Point& p2) {
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 }
 
-// K-means++ 초기 중심점 선택
-void kMeansPlusPlusInitialization(vector<Point>& points, vector<Point>& centers, int k) {
-    // 첫 번째 중심점은 파일에서 읽은 첫 번째 좌표로 고정
-    centers.push_back(points[0]); // 첫 번째 좌표는 첫 번째 중심점으로 설정
+// 클러스터의 중심점 계산 (x, y 좌표 평균값)
+Point calculateCenter(const vector<Point>& cluster) {
+    int sumX = 0, sumY = 0;
+    for (const auto& point : cluster) {
+        sumX += point.x;
+        sumY += point.y;
+    }
+    return Point(sumX / cluster.size(), sumY / cluster.size());
+}
 
-    while (centers.size() < k) {
-        double maxDistance = -1;
-        Point nextCenter;
+// K-means++ 초기화 알고리즘
+void initializeCenters(const vector<Point>& points, vector<Point>& centers, int k) {
+    centers.push_back(points[0]); // 첫 번째 중심점은 파일의 첫 번째 점으로 설정
 
-        // 각 점에 대해 가장 가까운 중심점과의 거리를 구하고, 가장 큰 거리의 점을 선택
-        for (const auto& point : points) {
-            double minDist = numeric_limits<double>::infinity();
-            for (const auto& center : centers) {
-                minDist = min(minDist, calculateDistance(point, center));
+    // 나머지 k-1개의 중심점 선택
+    for (int i = 1; i < k; ++i) {
+        vector<double> distances(points.size(), numeric_limits<double>::max());
+
+        // 각 점에 대해 가장 가까운 중심점과의 거리를 계산
+        for (int j = 0; j < points.size(); ++j) {
+            double minDist = numeric_limits<double>::max();
+            for (int c = 0; c < centers.size(); ++c) {
+                double dist = calculateDistance(points[j], centers[c]);
+                minDist = min(minDist, dist);
             }
+            distances[j] = minDist * minDist; // 거리의 제곱값을 사용
+        }
 
-            // maxDistance 보다 더 큰 거리가 있으면 그 점을 새로운 중심점 후보로 선택
-            if (minDist > maxDistance) {
-                maxDistance = minDist;
-                nextCenter = point;
+        // 가장 큰 거리를 가진 점을 새로운 중심점으로 추가
+        double maxDist = -1;
+        int maxIndex = -1;
+        for (int j = 0; j < points.size(); ++j) {
+            if (distances[j] > maxDist) {
+                maxDist = distances[j];
+                maxIndex = j;
             }
         }
 
-        centers.push_back(nextCenter); // 새로운 중심점 추가
+        centers.push_back(points[maxIndex]);
     }
 }
 
 // K-means 알고리즘
 void kMeansClustering(vector<Point>& points, int k) {
-    vector<Point> centers;          // 중심점 저장
+    vector<Point> centers(k);          // 중심점 저장
     vector<vector<Point>> clusters(k); // 각 클러스터에 포함된 점
 
-    // K-means++ 초기화 (첫 번째 중심점은 파일의 첫 번째 좌표로 설정)
-    kMeansPlusPlusInitialization(points, centers, k);
+    // 첫 번째 중심점은 입력 파일의 첫 번째 좌표로 고정
+    initializeCenters(points, centers, k);
 
     bool changed;
     do {
@@ -83,9 +98,12 @@ void kMeansClustering(vector<Point>& points, int k) {
 
         // 중심점 업데이트
         changed = false;
-        for (int i = 0; i < k; ++i) { // 첫 번째 중심점은 변경하지 않음
+        for (int i = 0; i < k; ++i) {
             if (!clusters[i].empty()) {
+                // 클러스터의 새로운 중심점을 계산
                 Point newCenter = calculateCenter(clusters[i]);
+
+                // 중심점이 변경되었으면, 해당 중심점을 업데이트하고 flag를 true로 설정
                 if (newCenter.x != centers[i].x || newCenter.y != centers[i].y) {
                     centers[i] = newCenter;
                     changed = true;
