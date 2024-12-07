@@ -40,7 +40,7 @@ Point calculateCenter(const vector<Point>& cluster) {
 void initializeCentersKMeansPlusPlus(vector<Point>& points, vector<Point>& centers, int k) {
     centers[0] = points[0]; // 첫 번째 중심점: 첫 번째 좌표 고정
     set<int> usedIndices;   // 이미 선택된 중심점 인덱스를 추적
-    usedIndices.insert(0);
+    usedIndices.insert(0);   // 첫 번째 인덱스는 이미 사용
 
     // 거리 제곱 배열
     vector<double> distances(points.size(), numeric_limits<double>::max());
