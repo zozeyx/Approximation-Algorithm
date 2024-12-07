@@ -40,12 +40,10 @@ public class JobScheduling {
         for (int i = 0; i <= 12; i++) { // 시간대 출력 (0부터 12까지)
             System.out.printf("%3d", i); // 3자리로 출력 (숫자 간격 고정)
         }
-        System.out.println();
 
         // t 값 (작업 번호) 출력
         System.out.print("     "); // 기계 이름 간격 맞추기
         for (int i = 0; i <= 12; i++) {
-            System.out.printf("%3s", "|"); // '|'로 숫자 아래 작업 구분선
         }
         System.out.println();
 
@@ -92,7 +90,5 @@ public class JobScheduling {
         // Job Scheduling 실행
         int result = approximateJobScheduling(m, operation_time);
 
-        // 결과 출력
-        System.out.println("모든 작업이 종료된 시간: " + result);
     }
 }
