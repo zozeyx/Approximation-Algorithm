@@ -25,25 +25,21 @@ double calculateDistance(const Point& p1, const Point& p2) {
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 }
 
-// 클러스터의 중심점 계산 (x, y 좌표 평균값)
-Point calculateCenter(const vector<Point>& cluster) {
-    int sumX = 0, sumY = 0;
-    for (const auto& point : cluster) {
-        sumX += point.x;
-        sumY += point.y;
-    }
-    return Point(sumX / cluster.size(), sumY / cluster.size());
-}
-
 // K-means 알고리즘
 void kMeansClustering(vector<Point>& points, int k) {
     vector<Point> centers(k);          // 중심점 저장
     vector<vector<Point>> clusters(k); // 각 클러스터에 포함된 점
 
-    // 첫 번째 중심점은 입력 파일의 첫 번째 좌표로 고정
-    centers[0] = points[0];
-    for (int i = 1; i < k; ++i) {
-        centers[i] = points[i % points.size()]; // 초기화 (순환 선택)
+    // 초기 중심점 설정: 입력 데이터에서 k개의 랜덤 점 선택
+    set<int> usedIndices;
+    srand(time(0)); // 난수 생성기 시드 초기화
+    for (int i = 0; i < k; ++i) {
+        int idx;
+        do {
+            idx = rand() % points.size(); // 입력 데이터 범위 내에서 랜덤 인덱스 선택
+        } while (usedIndices.find(idx) != usedIndices.end());
+        usedIndices.insert(idx);
+        centers[i] = points[idx];
     }
 
     bool changed;
@@ -69,9 +65,24 @@ void kMeansClustering(vector<Point>& points, int k) {
 
         // 중심점 업데이트
         changed = false;
-        for (int i = 1; i < k; ++i) { // 첫 번째 중심점은 변경하지 않음
+        for (int i = 0; i < k; ++i) {
             if (!clusters[i].empty()) {
-                Point newCenter = calculateCenter(clusters[i]);
+                Point newCenter = clusters[i][0]; // 새 중심점 초기값은 클러스터의 첫 번째 점
+                double minSumDistance = numeric_limits<double>::max();
+
+                // 중심점 후보는 클러스터 내의 모든 점 중에서 선택
+                for (const auto& candidate : clusters[i]) {
+                    double sumDistance = 0.0;
+                    for (const auto& point : clusters[i]) {
+                        sumDistance += calculateDistance(candidate, point);
+                    }
+                    if (sumDistance < minSumDistance) {
+                        minSumDistance = sumDistance;
+                        newCenter = candidate;
+                    }
+                }
+
+                // 중심점이 변경되었는지 확인
                 if (newCenter.x != centers[i].x || newCenter.y != centers[i].y) {
                     centers[i] = newCenter;
                     changed = true;
