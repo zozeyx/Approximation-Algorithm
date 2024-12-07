@@ -30,14 +30,17 @@ void kMeansClustering(vector<Point>& points, int k) {
     vector<Point> centers(k);          // 중심점 저장
     vector<vector<Point>> clusters(k); // 각 클러스터에 포함된 점
 
-    // 초기 중심점 설정: 입력 데이터에서 k개의 랜덤 점 선택
+    // 첫 번째 중심점은 입력 파일의 첫 번째 좌표로 고정
+    centers[0] = points[0];
     set<int> usedIndices;
-    srand(time(0)); // 난수 생성기 시드 초기화
-    for (int i = 0; i < k; ++i) {
+    usedIndices.insert(0); // 첫 번째 좌표는 이미 사용됨
+
+    // 나머지 초기 중심점은 입력 데이터에서 고름
+    for (int i = 1; i < k; ++i) {
         int idx;
         do {
             idx = rand() % points.size(); // 입력 데이터 범위 내에서 랜덤 인덱스 선택
-        } while (usedIndices.find(idx) != usedIndices.end());
+        } while (usedIndices.find(idx) != usedIndices.end()); // 중복 방지
         usedIndices.insert(idx);
         centers[i] = points[idx];
     }
@@ -65,7 +68,7 @@ void kMeansClustering(vector<Point>& points, int k) {
 
         // 중심점 업데이트
         changed = false;
-        for (int i = 0; i < k; ++i) {
+        for (int i = 1; i < k; ++i) { // 첫 번째 중심점은 변경하지 않음
             if (!clusters[i].empty()) {
                 Point newCenter = clusters[i][0]; // 새 중심점 초기값은 클러스터의 첫 번째 점
                 double minSumDistance = numeric_limits<double>::max();
