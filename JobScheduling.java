@@ -35,18 +35,25 @@ public class JobScheduling {
             machines.get(minMachine).add("t" + (i + 1) + "(" + startTime + "~" + endTime + ")");
         }
 
-        // m/t 출력 (숫자 간격을 맞추기 위해 고정된 폭 사용)
-        System.out.print("m/t ");
+        // 숫자 라인 출력
+        System.out.print("     "); // 기계 이름 간격 맞추기
         for (int i = 0; i <= 12; i++) { // 시간대 출력 (0부터 12까지)
             System.out.printf("%3d", i); // 3자리로 출력 (숫자 간격 고정)
         }
         System.out.println();
 
+        // t 값 (작업 번호) 출력
+        System.out.print("     "); // 기계 이름 간격 맞추기
+        for (int i = 0; i <= 12; i++) {
+            System.out.printf("%3s", "|"); // '|'로 숫자 아래 작업 구분선
+        }
+        System.out.println();
+
         // 각 기계별 작업 배치 결과 출력 (m4, m3, m2, m1 순으로 출력)
         for (int i = m - 1; i >= 0; i--) { // m4, m3, m2, m1 순으로 출력
-            System.out.print("m" + (i + 1) + " ");
+            System.out.print("m" + (i + 1) + "   ");
             String[] timeSlot = new String[13]; // 0부터 12까지 시간 슬롯 (13개)
-            Arrays.fill(timeSlot, "  "); // 초기값 공백으로 설정 (작업이 없음을 표시)
+            Arrays.fill(timeSlot, " "); // 초기값 공백으로 설정 (작업이 없음을 표시)
 
             // 기계에서 실행된 각 작업의 시작~종료 시간대를 시간 슬롯에 배치
             for (String task : machines.get(i)) {
