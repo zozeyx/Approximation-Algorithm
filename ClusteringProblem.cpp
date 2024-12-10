@@ -9,7 +9,7 @@
 
 using namespace std;
 
-// 구조체: 2D 좌표를 표현
+// 2D 좌표 구조체
 struct Point {
     int x, y;
     Point(int x = 0, int y = 0) : x(x), y(y) {}
@@ -20,20 +20,20 @@ struct Point {
     }
 };
 
-// 두 점 사이의 유클리드 거리 계산
+// 두 점 사이 유클리드 거리 계산
 double calculateDistance(const Point& p1, const Point& p2) {
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 }
 
-// K-means 알고리즘
+// K-means 알고리즘 ( 중심정들에서 제일 먼 점 )
 void kMeansClustering(vector<Point>& points, int k) {
     vector<Point> centers(k);          // 중심점 저장
     vector<vector<Point>> clusters(k); // 각 클러스터에 포함된 점
 
-    // 첫 번째 중심점은 입력 파일의 첫 번째 좌표로 고정
-    centers[0] = points[0];
+    
+    centers[0] = points[0]; //초기 센터 고정
     set<int> usedIndices;
-    usedIndices.insert(0); // 첫 번째 좌표는 이미 사용됨
+    usedIndices.insert(0);
 
     // 나머지 중심점은 기존 중심점들에 대해 가장 먼 점을 선택
     for (int i = 1; i < k; ++i) {
