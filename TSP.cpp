@@ -68,8 +68,8 @@ void preOrderTraversal(int node, const vector<vector<int>>& mst, vector<bool>& v
     }
 }
 
-// TSP 해결
-void solveTSP(const vector<Point>& points) {
+// TSP
+void TSP(const vector<Point>& points) {
     // 1. MST 생성
     vector<vector<int>> mst = createMST(points);
 
@@ -115,8 +115,8 @@ int main() {
         {'H', 4, 1}
     };
 
-    // TSP 해결
-    solveTSP(points);
+    // TSP
+    TSP(points);
 
     return 0;
 }
