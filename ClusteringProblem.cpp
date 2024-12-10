@@ -116,13 +116,14 @@ void kMeansClustering(vector<Point>& points, int k) {
     // 결과 출력
     cout << "Clusters and Centers:\n";
     for (int i = 0; i < k; ++i) {
-        cout << "Cluster " << i + 1 << ":\n";
+        cout << "Cluster " << i + 1 << ":";
         cout << "Center: (" << centers[i].x << ", " << centers[i].y << ")\n"; // 중심점 출력
 
         // 클러스터 점 출력
         for (const auto& point : clusters[i]) {
-            cout << "(" << point.x << ", " << point.y << ")\n";
+            cout << "(" << point.x << ", " << point.y << "),";
         }
+        cout << endl;
         cout << endl;
     }
 }
