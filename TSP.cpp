@@ -16,8 +16,8 @@ double calculateDistance(const Point& p1, const Point& p2) {
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 }
 
-// MST 생성: Prim's Algorithm
-vector<vector<int>> generateMST(const vector<Point>& points) {
+// MST 생성
+vector<vector<int>> createMST(const vector<Point>& points) {
     int n = points.size();
     vector<vector<int>> mst(n); // MST를 인접 리스트로 표현
     vector<bool> visited(n, false);
@@ -71,7 +71,7 @@ void preOrderTraversal(int node, const vector<vector<int>>& mst, vector<bool>& v
 // TSP 해결
 void solveTSP(const vector<Point>& points) {
     // 1. MST 생성
-    vector<vector<int>> mst = generateMST(points);
+    vector<vector<int>> mst = createMST(points);
 
     // 2. Pre-order Traversal로 경로 생성
     vector<bool> visited(points.size(), false);
